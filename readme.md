@@ -2,8 +2,9 @@ this is android h264 streaming player
 
 key feature:
 
-use tcp client;
-use MediaCodec for handware decode
+1\use tcp client;
+
+2\use MediaCodec for handware decode
 
 
 server side:
