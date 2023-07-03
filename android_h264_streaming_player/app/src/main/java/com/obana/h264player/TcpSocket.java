@@ -1,6 +1,8 @@
 package com.obana.h264player;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.obana.h264player.utils.AppLog;
 import com.obana.h264player.utils.ByteUtility;
@@ -19,6 +21,10 @@ public class TcpSocket {
     private static final int SUCCESS = 1;
     private static final int FAILED = 0;
     private static final int SOCKET_TIMEOUT_MS = 3000;
+
+    private static final String SP_KEY_MAC= "clientId";
+    private static final String SP_KEY_REDIS_IP= "serverIp";
+    private static final String SP_KEY_REDIS_PORT= "serverPort";
 
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
@@ -41,9 +47,13 @@ public class TcpSocket {
             AppLog.i(TAG, "--->alreay connect media socket, just return");
             return SUCCESS;
         }
-        AppLog.i(TAG, "--->media socket creating .....host:" + targetHost + " port:" + targetPort);
 
         //use cached host & port
+        targetHost = getSharedPreference(SP_KEY_REDIS_IP, targetHost);
+        String strPort = getSharedPreference(SP_KEY_REDIS_PORT, Integer.toString(targetPort));
+        int intPort = Integer.parseInt(strPort);
+        targetPort = intPort > 0 ? intPort : targetPort;
+        AppLog.i(TAG, "--->media socket creating .....host:" + targetHost + " port:" + targetPort);
         createMediaReceiverSocket(targetHost, targetPort);
 
 
@@ -112,6 +122,12 @@ public class TcpSocket {
             return;
         }
         AppLog.i(TAG, "--->media socket connected successfully!.....");
+    }
+
+    private String getSharedPreference(String key, String def) {
+        //return AndRovio.getSharedPreference(key);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getString(key, def);
     }
 
 }
