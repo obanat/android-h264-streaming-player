@@ -3,6 +3,7 @@ package com.obana.h264player;
 import android.app.Activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
@@ -13,12 +14,15 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.net.ConnectivityManager;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.obana.h264player.utils.AppLog;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
     public static final String TAG = "MainActivity";
 
     public static final int MESSAGE_CONNECT_TO_CAMERA_FAIL = 1002;
@@ -31,6 +35,7 @@ public class MainActivity extends Activity {
 
     private Handler handler = null;
     private H264SurfaceView mH264View;
+    private ImageButton mSetttingsBtn;
     private TcpSocket mTcpSocket;
 
     private PowerManager.WakeLock mWakeLock;
@@ -42,6 +47,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         mH264View = findViewById(R.id.h264View);
+        mSetttingsBtn = findViewById(R.id.setting_button);
         mTcpSocket = new TcpSocket(this);
 
         this.handler = new Handler() {
@@ -56,8 +62,16 @@ public class MainActivity extends Activity {
         if (powerManager != null) {
             mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "NEW:WakeLock");
         }
+
+        mSetttingsBtn.setOnClickListener(this);
     }
 
+    @Override
+    public void onClick(View view) {
+        if (view == mSetttingsBtn) {
+            startActivity(new Intent(this, Settings.class));
+        }
+    }
     public boolean onKeyDown(int paramInt, KeyEvent paramKeyEvent) {
         Log.i(TAG, "onKeyDown key=" + paramInt + " event=" + paramKeyEvent);
         Toast.makeText(this, "k:" + paramInt + " k:" + paramKeyEvent.getKeyCode(), Toast.LENGTH_SHORT).show();

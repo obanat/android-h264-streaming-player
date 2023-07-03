@@ -1,27 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.obana.h264player.MainActivity">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent">
+   
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="3">
-
-            <com.obana.h264player.H264SurfaceView
+   <com.obana.h264player.H264SurfaceView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/h264View" />
-
-        </RelativeLayout>
-    </LinearLayout>
-</RelativeLayout>
+    <ImageButton android:layout_gravity="top|right" android:id="@+id/setting_button" android:background="@android:color/transparent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="40dp" android:layout_marginRight="3dp" android:src="@drawable/button_settings"/>
+</FrameLayout>

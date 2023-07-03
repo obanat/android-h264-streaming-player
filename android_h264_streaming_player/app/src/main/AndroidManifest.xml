@@ -31,5 +31,6 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity android:label="设置" android:screenOrientation="landscape" android:name="com.obana.h264player.Settings"/>
 	</application>
 </manifest>
