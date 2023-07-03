@@ -1,9 +1,9 @@
-package com.obana.h264;
+package com.obana.h264player;
 
 import android.content.Context;
 
-import com.obana.h264.utils.AppLog;
-import com.obana.h264.utils.ByteUtility;
+import com.obana.h264player.utils.AppLog;
+import com.obana.h264player.utils.ByteUtility;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,8 +26,8 @@ public class TcpSocket {
     private byte[] mediaBuffer = new byte[MEDIA_BUF_SIZE];
     private Thread mediaRecvThread;
 
-    private String targetHost = "192.168.1.1";
-    private int targetPort = 8888;
+    private String targetHost = "192.168.10.1";
+    private int targetPort = 5555;
     private Context context;
     boolean bMediaConnected = false;
     boolean mediaThreadBool = false;

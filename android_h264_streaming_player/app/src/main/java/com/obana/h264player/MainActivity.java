@@ -1,4 +1,4 @@
-package com.obana.h264;
+package com.obana.h264player;
 
 import android.app.Activity;
 
@@ -16,8 +16,7 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.obana.h264.utils.AppLog;
-import com.obana.h264player.R;
+import com.obana.h264player.utils.AppLog;
 
 public class MainActivity extends Activity {
     public static final String TAG = "MainActivity";

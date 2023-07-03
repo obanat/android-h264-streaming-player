@@ -1,4 +1,4 @@
-package com.obana.h264;
+package com.obana.h264player;
 
 import android.app.Application;
 import android.view.WindowManager;

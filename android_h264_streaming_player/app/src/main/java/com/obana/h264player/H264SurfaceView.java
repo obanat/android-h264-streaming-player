@@ -1,11 +1,9 @@
-package com.obana.h264;
+package com.obana.h264player;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import java.nio.ByteBuffer;
 

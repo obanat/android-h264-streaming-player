@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.obana.h264.MainActivity">
+    tools:context="com.obana.h264player.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_weight="3">
 
-            <com.obana.h264.H264SurfaceView
+            <com.obana.h264player.H264SurfaceView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/h264View" />

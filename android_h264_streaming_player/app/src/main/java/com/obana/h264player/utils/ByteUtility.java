@@ -1,4 +1,4 @@
-package com.obana.h264.utils;
+package com.obana.h264player.utils;
 
 public class ByteUtility {
   static char[] hexDigit = new char[] { 

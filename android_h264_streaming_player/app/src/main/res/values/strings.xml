@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label">H264</string>
-    <string name="app_name">H264</string>
+    <string name="app_label">H264 Camera</string>
+    <string name="app_name">H264 Camera</string>
 
 </resources>
