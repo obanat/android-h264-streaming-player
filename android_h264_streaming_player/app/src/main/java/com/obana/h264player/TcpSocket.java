@@ -7,11 +7,15 @@ import android.preference.PreferenceManager;
 import com.obana.h264player.utils.AppLog;
 import com.obana.h264player.utils.ByteUtility;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 
 import javax.net.SocketFactory;
 
@@ -25,7 +29,9 @@ public class TcpSocket {
     private static final String SP_KEY_MAC= "clientId";
     private static final String SP_KEY_REDIS_IP= "serverIp";
     private static final String SP_KEY_REDIS_PORT= "serverPort";
+    private static final String SP_KEY_NETWORK_TYPE= "networkType";
 
+    private static final String P2P_HOST_URL = "http://obana.f3322.org:38086/wificar/getClientIp";
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
     private Socket mediaSocket;
@@ -53,6 +59,12 @@ public class TcpSocket {
         String strPort = getSharedPreference(SP_KEY_REDIS_PORT, Integer.toString(targetPort));
         int intPort = Integer.parseInt(strPort);
         targetPort = intPort > 0 ? intPort : targetPort;
+
+        if ("p2p".equalsIgnoreCase(getSharedPreference(SP_KEY_NETWORK_TYPE, ""))){
+            targetHost = getIpv6HostName();
+            targetPort = 28001;
+        }
+
         AppLog.i(TAG, "--->media socket creating .....host:" + targetHost + " port:" + targetPort);
         createMediaReceiverSocket(targetHost, targetPort);
 
@@ -130,4 +142,42 @@ public class TcpSocket {
         return sp.getString(key, def);
     }
 
+    private String getIpv6HostName() {
+        String targetHost = null;
+        Socket socket = null;
+
+        String url = P2P_HOST_URL;
+        String clientId = getSharedPreference(SP_KEY_MAC, "000136228899");
+        String redisServerIp = "obana.f3322.org";
+        String redisServerPort = "38086";
+
+        url = String.format("http://obana.f3322.org:38086/wificar/getClientIp?mac=%s", clientId);
+
+        AppLog.i(TAG, "redis server url:" + url);
+
+        String ipaddr = getURLContent(url);
+
+        AppLog.i(TAG, "ip v6 addr:" + ipaddr);
+        return ipaddr;
+    }
+
+    private static String getURLContent(String url) {
+        StringBuffer sb = new StringBuffer();
+
+        try {
+            URL updateURL = new URL(url);
+            URLConnection conn = updateURL.openConnection();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF8"));
+            while (true) {
+                String s = rd.readLine();
+                if (s == null) {
+                    break;
+                }
+                sb.append(s);
+            }
+        } catch (Exception e){
+
+        }
+        return sb.toString();
+    }
 }

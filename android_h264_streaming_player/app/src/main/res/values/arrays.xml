@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="cameraresolution_array">
+        <item>1080 x 720</item>
+        <item>640 x 480 (Default)</item>
+        <item>320 x 240</item>
+    </string-array>
+    <string-array name="cameraresolutionvals_array">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="networkType_array">
+        <item>local</item>
+        <item>p2p</item>
+    </string-array>
+</resources>

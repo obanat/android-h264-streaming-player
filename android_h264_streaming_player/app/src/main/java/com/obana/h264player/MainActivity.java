@@ -93,7 +93,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
         builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-
+        builder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         NetworkRequest build = builder.build();
         AppLog.i(TAG, "---> start request network ");
 

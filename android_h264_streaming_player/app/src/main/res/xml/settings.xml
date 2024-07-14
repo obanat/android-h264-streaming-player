@@ -2,10 +2,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/preference_pagelink_network_title">
         <PreferenceScreen android:title="网络设置" android:key="networkSettings" android:summary="@string/preference_pagelink_network_summary">
-            <EditTextPreference android:title="ID" android:key="clientId" android:summary="远控必须设置小车的MAC" android:defaultValue="" android:inputType="textNoSuggestions"/>
+            <ListPreference android:entries="@array/networkType_array" android:title="Network Type" android:key="networkType" android:summary="选择网络类型，local代表wifi，p2p代表远控" android:defaultValue="local" android:dialogTitle="选择网络类型" android:entryValues="@array/networkType_array"/>
+            <EditTextPreference android:title="ID" android:key="clientId" android:summary="远控必须设置小车的MAC" android:defaultValue="000136228899" android:inputType="textNoSuggestions"/>
             <EditTextPreference android:title="服务器IP" android:key="serverIp" android:summary="服务器的IP或者域名，非必须填写" android:defaultValue="" android:inputType="textNoSuggestions"/>
             <EditTextPreference android:title="服务器端口" android:key="serverPort" android:summary="服务器的端口号 10000-40000，非必须填写" android:defaultValue="0" android:inputType="number"/>
         </PreferenceScreen>
-
+        <PreferenceScreen android:title="视频设置" android:key="cameraSettings" android:summary="@string/preference_pagelink_camera_summary">
+            <ListPreference android:entries="@array/cameraresolution_array" android:title="@string/preference_cameraresolution_title" android:key="cameraresolution" android:summary="@string/preference_cameraresolution_summary" android:defaultValue="1" android:dialogTitle="@string/preference_cameraresolution_title" android:entryValues="@array/cameraresolutionvals_array"/>
+        </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -18,7 +18,11 @@
     <string name="app_label">H264 Camera</string>
     <string name="app_name">H264 Camera</string>
 
-    <string name="preference_pagelink_network_title">Network Settings</string>
-    <string name="preference_pagelink_network_summary">How to connect to server</string>
+    <string name="preference_pagelink_network_title">网络设置</string>
+    <string name="preference_pagelink_network_summary">设置连接参数，例如IP地址</string>
     <string name="preference_sectionheader_roviosettings">Rovio Device Settings</string>
+    <string name="preference_pagelink_camera_summary">设置分辨率等视频参数</string>
+    <string name="preference_cameraresolution_title">选择分辨率</string>
+    <string name="preference_cameraresolution_summary">调整相机分辨率：宽度x高度</string>
+
 </resources>
