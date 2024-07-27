@@ -16,11 +16,25 @@ import android.net.ConnectivityManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.obana.h264player.utils.AppLog;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
 
 public class MainActivity extends Activity implements View.OnClickListener {
     public static final String TAG = "MainActivity";
@@ -36,7 +50,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Handler handler = null;
     private H264SurfaceView mH264View;
     private ImageButton mSetttingsBtn;
+    private ImageButton mRecordVideoBtn;
+    private ImageView mRecordVideoView;
     private TcpSocket mTcpSocket;
+
+    private RandomAccessFile mH264DataFile = null;
+    private boolean mBRecording = false;
 
     private PowerManager.WakeLock mWakeLock;
 
@@ -48,6 +67,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         mH264View = findViewById(R.id.h264View);
         mSetttingsBtn = findViewById(R.id.setting_button);
+        mRecordVideoBtn = findViewById(R.id.record_button);
+        mRecordVideoView = findViewById(R.id.recording_view);
+
         mTcpSocket = new TcpSocket(this);
 
         this.handler = new Handler() {
@@ -64,12 +86,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         mSetttingsBtn.setOnClickListener(this);
+        mRecordVideoBtn.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         if (view == mSetttingsBtn) {
             startActivity(new Intent(this, Settings.class));
+        } else if (view == mRecordVideoBtn) {
+            mBRecording = mBRecording? false : true;
+
+            if (mTcpSocket!=null) mTcpSocket.startWriteToFile(mBRecording);
+            enableRecordingButtonBlinking(mBRecording);
+            if (mBRecording) {
+                prepareH264File();
+            } else {
+                stopWriteH264File();
+            }
         }
     }
     public boolean onKeyDown(int paramInt, KeyEvent paramKeyEvent) {
@@ -201,5 +234,56 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     public void drawH264View(byte[] data, int len) {
         mH264View.decodeOneFrame(data, len);
+    }
+
+    public void writeH264File(byte[] data, int len) {
+        try {
+            mH264DataFile.write(data, 0, len);
+        } catch (IOException e) {
+            AppLog.e(TAG, "writeH264File failed!");
+        }
+    }
+
+    private void stopWriteH264File() {
+        if (mTcpSocket != null) mTcpSocket.startWriteToFile(false);
+        mH264DataFile = null;
+    }
+
+    private static String getDateTimeStr() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH_mm_ss");
+        Date date = new Date();
+        String dateStr = simpleDateFormat.format(date);
+        return dateStr;
+    }
+
+    private void prepareH264File() {
+        File file = new File(this.getExternalFilesDir(null)
+                + "/" + getDateTimeStr() + "_.mp4");
+        try {
+            mH264DataFile = new RandomAccessFile(file, "rw");
+        } catch (FileNotFoundException e) {
+            AppLog.e(TAG, "prepareH264File failed!");
+        }
+
+    }
+
+    private void enableRecordingButtonBlinking(boolean blinking) {
+        if (mRecordVideoView == null) return;
+        if (blinking) {
+            final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
+            animation.setDuration(800); // duration - half a second
+            animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+            animation.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
+            animation.setRepeatMode(Animation.REVERSE); //
+            mRecordVideoView.setAnimation(animation);
+            mRecordVideoView.setImageResource(R.drawable.recording);
+
+            mRecordVideoBtn.setImageResource(R.drawable.video_record_start);
+        } else {
+            mRecordVideoView.setAnimation(null);
+            mRecordVideoView.setImageResource(0);
+
+            mRecordVideoBtn.setImageResource(R.drawable.video_record_stop);
+        }
     }
 }
