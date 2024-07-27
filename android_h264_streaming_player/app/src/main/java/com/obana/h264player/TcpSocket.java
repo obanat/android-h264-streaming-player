@@ -147,7 +147,7 @@ public class TcpSocket {
         Socket socket = null;
 
         String url = P2P_HOST_URL;
-        String clientId = getSharedPreference(SP_KEY_MAC, "000136228899");
+        String clientId = getSharedPreference(SP_KEY_MAC, "dji");
         String redisServerIp = "obana.f3322.org";
         String redisServerPort = "38086";
 
