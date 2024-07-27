@@ -44,6 +44,8 @@ public class TcpSocket {
     boolean bMediaConnected = false;
     boolean mediaThreadBool = false;
 
+    boolean bWriteToFile = false;
+
     public TcpSocket(Context ctx){
         context = ctx;
     }
@@ -100,6 +102,9 @@ public class TcpSocket {
 
                     MainActivity activity = (MainActivity)context;
                     activity.drawH264View(ByteUtility.arrayCopy(mediaBuffer, 0, i), i);
+
+                    if (bWriteToFile) activity.writeH264File(ByteUtility.arrayCopy(mediaBuffer, 0, i), i);
+
                     try {
                         Thread.sleep(5L);
                     } catch(Exception e) {
@@ -179,5 +184,9 @@ public class TcpSocket {
 
         }
         return sb.toString();
+    }
+
+    public void startWriteToFile(boolean write) {
+        bWriteToFile = write;
     }
 }
