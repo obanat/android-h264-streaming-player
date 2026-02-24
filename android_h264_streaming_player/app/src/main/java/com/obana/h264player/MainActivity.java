@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.net.ConnectivityManager;
 import android.view.KeyEvent;
@@ -26,14 +27,20 @@ import android.widget.Toast;
 
 import com.obana.h264player.utils.AppLog;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -41,6 +48,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     public static final int MESSAGE_CONNECT_TO_CAMERA_FAIL = 1002;
     public static final int MESSAGE_RECONNECT_TO_CAMERA = 1003;
+
+    public static final int MESSAGE_SYNC_TIME = 1004;
     public static final int MESSAGE_MAKE_TOAST = 6001;
     public static final boolean SHOW_DEBUG_MESSAGE = true;
     public static final String BUNDLE_KEY_TOAST_MSG = "Tmessage";
@@ -49,6 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private Handler handler = null;
     private H264SurfaceView mH264View;
+    private MjpegView mJpegView;
     private ImageButton mSetttingsBtn;
     private ImageButton mRecordVideoBtn;
     private ImageView mRecordVideoView;
@@ -65,7 +75,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
 
-        mH264View = findViewById(R.id.h264View);
+        //mH264View = findViewById(R.id.h264View);
+        mJpegView = findViewById(R.id.mjpegView);
         mSetttingsBtn = findViewById(R.id.setting_button);
         mRecordVideoBtn = findViewById(R.id.record_button);
         mRecordVideoView = findViewById(R.id.recording_view);
@@ -144,6 +155,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     Runnable connectRunnable = new Runnable() {
         public void run() {
             AppLog.i(TAG, "--->connectRunnable. connecting to camera.....");
+            getHttpTime(5000);
 
             int ret = mTcpSocket.connect();
             if (ret <= 0) {
@@ -172,9 +184,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         //request network, then start camera socket
-        if (!mTcpSocket.isConnected() && !handler.hasMessages(MESSAGE_RECONNECT_TO_CAMERA)) {
+        //if (!mTcpSocket.isConnected() && !handler.hasMessages(MESSAGE_RECONNECT_TO_CAMERA)) {
             requestSpecifyNetwork();
-        }
+        //}
+
+        //switch to mjpview
+        //mJpegView.setStreamPara();
+        //mJpegView.startStream();
+        //mJpegView.startPlayback("http://192.168.10.1:8080/?action=stream");
     }
 
     protected void onPause() {
@@ -217,6 +234,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     (new Thread(connectRunnable)).start();
                 }
                 break;
+            case MESSAGE_SYNC_TIME:
+                getHttpTime(5000);
+                break;
             default:
                 return false;
         }
@@ -233,6 +253,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     public void drawH264View(byte[] data, int len) {
+
         mH264View.decodeOneFrame(data, len);
     }
 
@@ -284,6 +305,70 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mRecordVideoView.setImageResource(0);
 
             mRecordVideoBtn.setImageResource(R.drawable.video_record_stop);
+        }
+    }
+
+    private void getHttpTime(int timeout){
+        HttpURLConnection httpconn;
+        String httpServerURL = "http://i4free.x3322.net:38080";
+        URL url = null;
+        try {
+            url = new URL(httpServerURL);
+            httpconn = (HttpURLConnection) url.openConnection();
+            httpconn.setRequestMethod("GET");
+            httpconn.setDoInput(true);
+            httpconn.setUseCaches(false);
+            httpconn.setInstanceFollowRedirects(false);
+            httpconn.setRequestProperty("Accept-Charset", "UTF-8");
+            Log.i(TAG, "timeout:" + timeout);
+            httpconn.setConnectTimeout(timeout);
+            httpconn.setReadTimeout(timeout);
+            long requestTicks = SystemClock.elapsedRealtime();
+            Log.i(TAG, "Strart to connect http server!");
+            httpconn.connect();
+            InputStreamReader mInputStreamReader = null;
+            BufferedReader mBufferedReader = null;
+            StringBuffer sb = new StringBuffer();
+            int responseCode = httpconn.getResponseCode();
+            Log.i(TAG, "Start to parse http response! Code:" + responseCode);
+            if (responseCode != 200) {
+                Log.e(TAG, "Http response error:" + responseCode);
+            } else {
+                mInputStreamReader = new InputStreamReader(httpconn.getInputStream(), "utf-8");
+                mBufferedReader = new BufferedReader(mInputStreamReader);
+                while (true) {
+                    String lineString = mBufferedReader.readLine();
+                    if (lineString == null) break;
+                    sb.append(lineString);
+                }
+            }
+            Log.i(TAG, "Read response finish, lineString=" + sb.toString());
+            if (mBufferedReader != null) {
+                mBufferedReader.close();
+            }
+            if (mInputStreamReader != null) {
+                mInputStreamReader.close();
+            }
+            httpconn.disconnect();
+            Log.i(TAG, "disconnect");
+            String inputString = sb.toString();
+            String[] dateStrings = inputString.split(",");
+            if (dateStrings.length > 0) {
+                Log.i(TAG, "lineString1=" + dateStrings[0]);
+                String[] dateStrings2 = dateStrings[0].split(":");
+                if (dateStrings2.length == 2) {
+                    Log.i(TAG, "lineString2=" + dateStrings2[1]);
+                    String dateTime = dateStrings2[1];
+                    long lDateTime = Long.parseLong(dateTime.trim());
+                    Date date = new Date(lDateTime*1000L);
+                    Log.i(TAG, "lineString3=" + date.toString());
+                    // 创建SimpleDateFormat对象
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                    //Toast.makeText(this,sdf.format(date),Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "show date time =" + sdf.format(date));
+                }
+            }
+        } catch (Exception e) {
         }
     }
 }

@@ -2,6 +2,7 @@ package com.obana.h264player;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -20,6 +21,7 @@ public class H264SurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public float ZOOM[] = {
         100F, 125F, 150F, 175F, 200F
     };
+    private static final String MIME_TYPE = "video/avc";
     public static int[] Video_WandH = new int[] { 640, 480 };
     Bitmap bitmap;
     float bx;
@@ -50,14 +52,14 @@ public class H264SurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void initMediaCodec() {
         if (mCodecState > 0) return;
 
-        MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", Video_WandH[0], Video_WandH[1]);
+        MediaFormat mediaFormat = MediaFormat.createVideoFormat(MIME_TYPE, mVideoWidth, mVideoHeight);
 
-        /*mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 1);
-        mediaFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, 1);
-        mediaFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);*/
+        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
+        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 2000*1024);
+        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
         try {
-            mCodec = MediaCodec.createDecoderByType("video/avc");
+            mCodec = MediaCodec.createDecoderByType(MIME_TYPE);
             if (mSurface != null && mSurface.isValid()) {
                 mCodec.configure(mediaFormat, mSurface, null, 0);
                 mCodec.start();
@@ -179,16 +181,26 @@ public class H264SurfaceView extends SurfaceView implements SurfaceHolder.Callba
             if (mCodec != null) {
                 try {
 
-                    int inputBufferIndex = mCodec.dequeueInputBuffer(0);
+                    int inputBufferIndex = mCodec.dequeueInputBuffer(10000);
                     if (inputBufferIndex >= 0) {
-                        ByteBuffer inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
-                        long timestamp = mFrameIndex++ * 1000000 / 30;
-                        inputBuffer.clear();
-                        inputBuffer.put(data, 0, length);
-                        mCodec.queueInputBuffer(inputBufferIndex, 0, length, timestamp, 0);
+                        ByteBuffer inputBuffer;
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
+                        } else {
+                            ByteBuffer[] inputBuffers = mCodec.getInputBuffers();
+                            inputBuffer = inputBuffers[inputBufferIndex];
+                        }
+
+                        if (inputBuffer != null) {
+                            inputBuffer.clear();
+                            inputBuffer.put(data,0,length);
+                            mCodec.queueInputBuffer(inputBufferIndex, 0, data.length, System.nanoTime() / 1000, 0);
+                        }
+
                     }
                     MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-                    int outputBufferIndex = mCodec.dequeueOutputBuffer(bufferInfo, 0);
+                    int outputBufferIndex = mCodec.dequeueOutputBuffer(bufferInfo, 10000);
                     while (outputBufferIndex >= 0) {
                         mCodec.releaseOutputBuffer(outputBufferIndex, true);
                         outputBufferIndex = mCodec.dequeueOutputBuffer(bufferInfo, 0);

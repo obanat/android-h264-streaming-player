@@ -90,7 +90,7 @@ public class TcpSocket {
                 do {
                     try {
                         i = dataInputStream.read(mediaBuffer);
-                        AppLog.i(TAG, "Receive media socket data, length:" + i);
+                        //AppLog.i(TAG, "Receive media socket data, length:" + i);
                     } catch(IOException ioexception) {
                         AppLog.e(TAG, "media receive loop io exception!, just exit thread!");
                         break;
